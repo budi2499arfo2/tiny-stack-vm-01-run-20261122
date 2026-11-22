@@ -13,11 +13,14 @@ function run(p, inp) {
   const S = new Int32Array(256), C = new Int32Array(64), Mm = new Int32Array(256);
   let pc = 0, sp = 0, cp = 0, ip = 0, st = 0, o = '';
   for (;;) {
+    // ISA "One step", in order: 1 step limit (10), 2 pc bounds (9),
+    // 3 unknown opcode (5), 4 cut-off immediate (9), 5 stack checks (2, 3).
     if (st === 1000000) return [10, o];
     if (pc < 0 || pc >= n) return [9, o];
     const op = p[pc], m = M[op];
     if (!m) return [5, o];
-    if (pc + m[0] >= n) return [9, o];
+    // No-immediate opcodes can never be cut off (pc < n was just checked).
+    if (m[0] && pc + m[0] >= n) return [9, o];
     st++;
     const nx = pc + 1 + m[0];
     if (sp < m[1]) return [2, o];
